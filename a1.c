@@ -1,6 +1,8 @@
 #include "test.h"
+#include <stdbool.h>
 
 #include <string.h> // for testing generate_splits()
+#include <stdio.h>
 
 /*
  * Generate k-selections of a[0..n-1] in lexicographic order and call process_selection to process them.
@@ -12,18 +14,35 @@
  */
 void generate_selections(int a[], int n, int k, int b[], void *data, void (*process_selection)(int *b, int k, void *data))
 {
-    b[0] = 2; b[1] = 1;
-    process_selection(b, 2, data);
-    b[0] = 2; b[1] = 6;
-    process_selection(b, 2, data);
-    b[0] = 2; b[1] = 5;
-    process_selection(b, 2, data);
-    b[0] = 1; b[1] = 6;
-    process_selection(b, 2, data);
-    b[0] = 1; b[1] = 5;
-    process_selection(b, 2, data);
-    b[0] = 6; b[1] = 5;
-    process_selection(b, 2, data);
+    if (n > k) {
+        for (int i = 0; i < k; i++) {
+            b[i] = i;
+        }
+
+        while (b[0] <= n - k) {
+            int l[k];
+            for (int i = 0; i < k; i++) {
+                l[i] = a[b[i]];
+            }
+
+            process_selection(l, k, data);
+
+            int j = k - 1;
+            while (b[j] == j + n - k && j >= 0) {
+                j = j - 1;
+            }
+            if (j == -1) {
+                break;
+            }
+            b[j] += 1;
+            for (int f = j + 1; f < k; f++) {
+                b[f] = b[f - 1] + 1;
+            }
+        }
+    } else {
+        return;
+    }
+
 }
 
 /*
@@ -40,20 +59,60 @@ void generate_splits(const char *source, const char *dictionary[], int nwords, c
     process_split(buf, data);
     strcpy(buf, "artist oil");
     process_split(buf, data);
+
 }
+
 
 /*
  * Transform a[] so that it becomes the previous permutation of the elements in it.
  * If a[] is the first permutation, leave it unchanged.
  */
+// void previous_permutation(int a[], int n)
+// {
+//     a[0] = 1;
+//     a[1] = 5;
+//     a[2] = 4;
+//     a[3] = 6;
+//     a[4] = 3;
+//     a[5] = 2;
+// }
 void previous_permutation(int a[], int n)
 {
-    a[0] = 1;
-    a[1] = 5;
-    a[2] = 4;
-    a[3] = 6;
-    a[4] = 3;
-    a[5] = 2;
+
+
+    int i = n - 2;
+    while (i >= 0) {
+        if (a[i + 1] < a[i]) {
+            break;
+        }
+        i--;
+    }
+    if(i==-1){
+        
+        return;
+    }
+
+    int j = n-1;
+    while (j >=0) {
+        if (j > i && a[j] < a[i]) {
+            int temp = a[j];
+            a[j] = a[i];
+            a[i] = temp;
+            break;
+        }
+        j--;
+    }
+
+    j = n - 1;
+    while (i + 1 < j) {
+        int temp = a[i + 1];
+        a[i + 1] = a[j];
+        a[j] = temp;
+        i++;
+        j--;
+    }
+    
+
 }
 
 /* Write your tests here. Use the previous assignment for reference. */
